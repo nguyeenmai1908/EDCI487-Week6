@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Section 3: The Histories That Got Left Out — EDCI 487 Week 6</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --forest:    #2d5a3f;
+      --near-black:#1c1a14;
+      --moss:      #4a6741;
+      --sage:      #7a9e6e;
+      --sage-pale: #deebd4;
+      --clay:      #c4622d;
+      --ember:     #e8874a;
+      --sand:      #e8d5b0;
+      --cream:     #f5f0e8;
+      --white:     #fefcf8;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; font-weight: 300; background: var(--cream); color: var(--near-black); min-height: 100vh; }
+    body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.035; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 200px 200px; }
+
+    #progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--clay), var(--ember)); transform-origin: left; transform: scaleX(0); transition: transform 0.1s linear; z-index: 1000; }
+
+    /* HAMBURGER TOGGLE */
+    .sidebar-toggle { position: fixed; top: 1.25rem; left: 1.25rem; z-index: 200; width: 40px; height: 40px; background: rgba(47,74,47,0.9); border: 1px solid rgba(122,158,110,0.25); border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: background 0.2s; }
+    .sidebar-toggle:hover { background: rgba(47,74,47,1); }
+    .sidebar-toggle .bar { display: block; width: 18px; height: 2px; background: var(--cream); border-radius: 1px; transition: transform 0.3s ease, opacity 0.3s ease; }
+    .sidebar-toggle.open .bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .sidebar-toggle.open .bar:nth-child(2) { opacity: 0; }
+    .sidebar-toggle.open .bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* SIDEBAR OVERLAY */
+    .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 140; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .sidebar-overlay.visible { opacity: 1; pointer-events: auto; }
+
+    /* SIDEBAR */
+    .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: #2f4a2f; border-right: 1px solid rgba(122,158,110,0.2); z-index: 150; display: flex; flex-direction: column; align-items: stretch; padding: 4.5rem 0 2rem; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s ease; text-align: left; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo { font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(122,158,110,0.5); padding: 0 1rem 1.5rem 2rem; border-bottom: 1px solid rgba(122,158,110,0.1); margin-bottom: 1.5rem; line-height: 1.6; }
+    .sidebar-nav { display: flex; flex-direction: column; padding: 0; }
+    .nav-item { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.7rem 1rem 0.7rem 2rem; position: relative; text-decoration: none; transition: background 0.2s ease; width: 100%; }
+    .nav-item:hover { background: rgba(245,240,232,0.04); }
+    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--clay); }
+    .nav-num { font-size: 0.68rem; font-weight: 500; color: rgba(245,240,232,0.25); width: 1.5rem; flex-shrink: 0; text-align: left; }
+    .nav-item.active .nav-num { color: var(--clay); }
+    .nav-label { font-size: 0.75rem; font-weight: 300; line-height: 1.4; color: rgba(245,240,232,0.35); flex: 1; min-width: 0; text-align: left; }
+    .nav-item.active .nav-label { color: var(--cream); font-weight: 500; }
+    .nav-time { font-size: 0.6rem; color: rgba(245,240,232,0.22); letter-spacing: 0.06em; flex-shrink: 0; white-space: nowrap; }
+
+    .block-inner { width: min(1080px, 100%); margin: 0 auto; }
+
+    .section-header { background: var(--forest); padding: 2.5rem 3rem; }
+    .section-header-row { display: flex; align-items: center; gap: 1.5rem; }
+    .sh-number { font-family: 'Playfair Display', serif; font-size: 10rem; font-weight: 900; color: rgba(255,255,255,0.2); line-height: 1; flex-shrink: 0; user-select: none; }
+    .sh-center { flex: 1; }
+    .sh-label { font-size: 1rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clay); margin-bottom: 0.35rem; }
+    .sh-title { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 700; color: var(--cream); line-height: 1.25; }
+    .sh-time { font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,240,232,0.28); flex-shrink: 0; align-self: center; }
+
+    .content-block { background: var(--white); padding: 3.5rem 3rem 2.5rem; }
+    .content-block.alt { background: var(--cream); }
+    .content-block p { font-size: 1rem; line-height: 1.9; color: rgba(26,46,26,0.75); margin-bottom: 0.5rem; }
+    .content-block p:last-child { margin-bottom: 0; }
+    .content-block strong { font-weight: 500; color: var(--near-black); }
+
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal[data-delay="1"] { transition-delay: 0.1s; }
+    .reveal[data-delay="2"] { transition-delay: 0.2s; }
+    .reveal[data-delay="3"] { transition-delay: 0.3s; }
+
+    /* transition card */
+    .transition-card { padding: 3rem; background: var(--forest); }
+    .transition-card p { font-size: 1rem; line-height: 1.8; color: rgba(245,240,232,0.65); font-style: italic; font-family: 'Playfair Display', serif; }
+    .transition-card-line { width: 40px; height: 2px; background: var(--clay); margin-bottom: 1.5rem; }
+
+    /* begin / continue */
+    .begin-section { background: var(--cream); padding: 4rem 3rem; display: flex; justify-content: space-between; align-items: center; gap: 4rem; }
+    .begin-text .begin-heading { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--forest); font-weight: 700; margin-bottom: 0.6rem; }
+    .begin-text .begin-sub { font-size: 1rem; line-height: 1.75; color: rgba(26,46,26,0.6); max-width: 480px; }
+    .begin-action { display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem; flex-shrink: 0; }
+    .btn-begin { display: inline-flex; align-items: center; gap: 1rem; background: var(--clay); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; padding: 1rem 2rem; border-radius: 4px; transition: background 0.2s; }
+    .btn-begin:hover { background: var(--ember); }
+    .btn-begin .arrow { width: 20px; height: 1px; background: currentColor; position: relative; transition: width 0.25s; }
+    .btn-begin:hover .arrow { width: 28px; }
+    .btn-begin .arrow::after { content: ''; position: absolute; right: 0; top: -3px; width: 7px; height: 7px; border-right: 1px solid currentColor; border-top: 1px solid currentColor; transform: rotate(45deg); }
+    .time-note { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(26,46,26,0.35); }
+
+    /* WATCH CARDS */
+    .watch-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .watch-card { background: var(--white); border: 1px solid rgba(122,158,110,0.3); border-left: 3px solid var(--sage); border-radius: 8px; padding: 1.4rem 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; }
+    .watch-card .watch-num { font-size: 0.65rem; font-weight: 600; color: var(--clay); background: rgba(196,98,45,0.1); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; letter-spacing: 0; }
+    .watch-card .watch-text { font-size: 0.95rem; line-height: 1.7; color: var(--near-black); }
+
+    /* VIDEO EMBED */
+    .video-embed { display: block; position: relative; width: 100%; padding-top: 56.25%; border: 2px solid var(--near-black); border-radius: 4px; overflow: hidden; background: var(--near-black); cursor: pointer; text-decoration: none; }
+    .video-thumb { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+    .video-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 72px; height: 72px; background: rgba(0,0,0,0.65); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .video-embed:hover .video-play { background: var(--clay); }
+    .video-play::after { content: ''; display: block; width: 0; height: 0; border-style: solid; border-width: 12px 0 12px 22px; border-color: transparent transparent transparent var(--white); margin-left: 4px; }
+    .video-meta { margin-top: 1rem; display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .video-meta span { font-size: 0.78rem; letter-spacing: 0.06em; color: rgba(26,46,26,0.45); }
+    .video-meta strong { font-weight: 500; color: rgba(26,46,26,0.65); }
+
+    /* REFLECTION BLOCK */
+    .reflection-block { background: var(--cream); padding: 3.5rem 3rem 2.5rem; }
+    .reflection-heading { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--forest); font-weight: 700; margin-bottom: 0.4rem; }
+    .reflection-subhead { font-size: 0.95rem; line-height: 1.7; color: rgba(26,46,26,0.55); margin-bottom: 2.5rem; }
+
+    /* REFLECTION PROMPT */
+    .reflection-prompt { background: var(--white); border-radius: 10px; padding: 2rem 2.25rem; margin-bottom: 1.75rem; }
+    .reflection-prompt:last-of-type { margin-bottom: 0; }
+    .reflection-prompt-num { font-size: 0.65rem; font-weight: 600; color: var(--clay); background: rgba(196,98,45,0.1); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; letter-spacing: 0; }
+    .reflection-prompt p { font-size: 1rem; line-height: 1.9; color: rgba(26,46,26,0.75); margin-bottom: 1.25rem; }
+    .reflection-prompt textarea { width: 100%; min-height: 120px; padding: 1rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 300; line-height: 1.7; color: var(--near-black); background: var(--cream); border: 1px solid rgba(74,103,65,0.18); border-radius: 6px; resize: vertical; outline: none; transition: border-color 0.2s; }
+    .reflection-prompt textarea:focus { border-color: var(--sage); }
+    .reflection-prompt textarea::placeholder { color: rgba(26,46,26,0.3); }
+
+    /* SCAFFOLD TOGGLE */
+    .scaffold-toggle { margin-top: 0.75rem; }
+    .scaffold-toggle summary { font-size: 0.8rem; font-weight: 500; color: var(--moss); cursor: pointer; letter-spacing: 0.04em; list-style: none; display: inline-flex; align-items: center; gap: 0.4rem; user-select: none; }
+    .scaffold-toggle summary::-webkit-details-marker { display: none; }
+    .scaffold-toggle summary::before { content: '+'; font-size: 0.85rem; font-weight: 600; color: var(--sage); width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(122,158,110,0.35); border-radius: 50%; flex-shrink: 0; transition: transform 0.2s; }
+    .scaffold-toggle[open] summary::before { content: '-'; }
+    .scaffold-content { margin-top: 0.75rem; padding: 1rem 1.25rem; background: var(--sage-pale); border-radius: 6px; font-size: 0.9rem; line-height: 1.75; color: rgba(26,46,26,0.65); font-style: italic; }
+
+    /* DEFINITIONS BLOCK */
+    .definitions-block { background: var(--sage-pale); padding: 3.5rem 3rem 2.5rem; border-top: 1px solid rgba(74,103,65,0.1); }
+    .definitions-label { font-size: 0.85rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--moss); margin-bottom: 2rem; }
+    .definition-entry { margin-bottom: 2rem; }
+    .definition-entry:last-child { margin-bottom: 0; }
+    .definition-term { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--forest); margin-bottom: 0.4rem; }
+    .definition-term span { font-weight: 400; font-size: 0.85rem; color: rgba(26,46,26,0.45); font-family: 'DM Sans', sans-serif; }
+    .definition-body { font-size: 0.95rem; line-height: 1.85; color: rgba(26,46,26,0.7); }
+
+    @media (max-width: 768px) {
+      .section-header, .content-block, .reflection-block, .definitions-block, .transition-card, .begin-section { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .sh-number { font-size: 5rem; }
+      .begin-section { flex-direction: column; align-items: flex-start; }
+      .begin-action { align-items: flex-start; }
+      .watch-cards { grid-template-columns: 1fr; }
+      .reflection-prompt { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="progress-bar"></div>
+
+<button class="sidebar-toggle" aria-label="Toggle navigation">
+  <span class="bar"></span>
+  <span class="bar"></span>
+  <span class="bar"></span>
+</button>
+<div class="sidebar-overlay"></div>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">EDCI 487<br>Climate Change Education<br>Week 6</div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="week6-intro.html">
+      <span class="nav-num">&uarr;</span>
+      <span class="nav-label">Intro &amp; Overview</span>
+    </a>
+    <a class="nav-item" href="section1.html">
+      <span class="nav-num">01</span>
+      <span class="nav-label">One Planet's Worth of Year</span>
+    </a>
+    <a class="nav-item" href="section2.html">
+      <span class="nav-num">02</span>
+      <span class="nav-label">The Math of Demand and Regeneration</span>
+    </a>
+    <a class="nav-item active" href="section3.html">
+      <span class="nav-num">03</span>
+      <span class="nav-label">The Histories That Got Left Out</span>
+    </a>
+    <a class="nav-item" href="section4.html">
+      <span class="nav-num">04</span>
+      <span class="nav-label">Who's in the "We"?</span>
+    </a>
+    <a class="nav-item" href="section5.html">
+      <span class="nav-num">05</span>
+      <span class="nav-label">Teaching the Relational Move</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- SECTION HEADER -->
+<section class="section-header">
+  <div class="block-inner section-header-row">
+    <div class="sh-number">03</div>
+    <div class="sh-center">
+      <div class="sh-label">Section 3 of 5</div>
+      <div class="sh-title reveal">The Histories That Got Left Out</div>
+    </div>
+    <div class="sh-time reveal">~20 minutes</div>
+  </div>
+</section>
+
+<!-- OPENING TEXT -->
+<section class="content-block alt reveal">
+  <div class="block-inner">
+    <p>When you picture "an environmentalist," what comes to mind?</p>
+    <p>If your image is a white man in a Patagonia jacket on a Sierra Club hike — or John Muir, or Teddy Roosevelt, or Rachel Carson — that's not your fault. It's the version of environmental history most North American education has taught for the past sixty years. It's also incomplete.</p>
+    <p>The next 13 minutes give you a different version of that history. Watch it before you read on.</p>
+  </div>
+</section>
+
+<!-- PRE-WATCH PROMPTS -->
+<section class="content-block reveal">
+  <div class="block-inner">
+    <div style="font-size:0.85rem; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:var(--moss); margin-bottom:1.75rem;">Watch for</div>
+    <div class="watch-cards">
+      <div class="watch-card reveal" data-delay="1">
+        <span class="watch-num">01</span>
+        <span class="watch-text">Names you've never heard. Who? And what did they do?</span>
+      </div>
+      <div class="watch-card reveal" data-delay="2">
+        <span class="watch-num">02</span>
+        <span class="watch-text">Movements you've never heard of. When did they happen, and where?</span>
+      </div>
+      <div class="watch-card reveal" data-delay="3">
+        <span class="watch-num">03</span>
+        <span class="watch-text">The moments where mainstream environmentalism failed communities — and why.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEO EMBED -->
+<section class="content-block alt reveal">
+  <div class="block-inner">
+    <a class="video-embed" href="https://www.youtube.com/watch?v=cyqYN90PPjE" target="_blank" rel="noopener">
+      <img class="video-thumb" src="video-thumbnail.png" alt="The Intersectional History of Environmentalism — click to watch">
+      <div class="video-play"></div>
+    </a>
+    <div class="video-meta">
+      <span><strong>Title:</strong> The Intersectional History of Environmentalism</span>
+      <span><strong>Creator:</strong> Intersectional Environmentalist</span>
+      <span><strong>Length:</strong> ~13 minutes</span>
+    </div>
+  </div>
+</section>
+
+<!-- POST-WATCH REFLECTION -->
+<section class="reflection-block reveal">
+  <div class="block-inner">
+    <h2 class="reflection-heading">Three things to hold in mind</h2>
+    <p class="reflection-subhead">These are for your own thinking — not submitted. Let them sit with you and bring your responses to class.</p>
+
+    <div class="reflection-prompt reveal" data-delay="1">
+      <div class="reflection-prompt-num">01</div>
+      <p>Name one figure or movement from the video that you'd never been taught before. Why do you think their work was left out of the mainstream environmental story?</p>
+      <details class="scaffold-toggle">
+        <summary>Need a starting point?</summary>
+        <div class="scaffold-content">Consider race, class, geography, time period, and what counts as a "leader" in the dominant version.</div>
+      </details>
+    </div>
+
+    <div class="reflection-prompt reveal" data-delay="2">
+      <div class="reflection-prompt-num">02</div>
+      <p>The video traces a pattern: mainstream environmentalism often centered conservation of "wilderness" while sidelining the communities (often Black, Indigenous, low-income) most exposed to pollution and environmental harm. Where do you see this pattern still playing out today?</p>
+      <details class="scaffold-toggle">
+        <summary>Need a starting point?</summary>
+        <div class="scaffold-content">Think about climate marches you've seen, environmental orgs you've heard of, who gets quoted as an "expert" in climate news, whose neighbourhoods get the new park vs. the new highway.</div>
+      </details>
+    </div>
+
+    <div class="reflection-prompt reveal" data-delay="3">
+      <div class="reflection-prompt-num">03</div>
+      <p>Connect this back to Section 2. Overshoot is driven disproportionately by wealthy nations and wealthy consumers. The communities most harmed by overshoot's symptoms — extreme heat, food insecurity, displacement — are often the ones who contributed least to causing it. What does that connection ask of climate education?</p>
+      <details class="scaffold-toggle">
+        <summary>Need a starting point?</summary>
+        <div class="scaffold-content">"Asks of" can mean: what to teach, who to centre, what to question, what to refuse.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- DEFINITIONS FOOTER -->
+<section class="definitions-block reveal">
+  <div class="block-inner">
+    <div class="definitions-label">Key terms</div>
+    <div class="definition-entry">
+      <div class="definition-term">Intersectionality <span>(Kimberle Crenshaw, 1989)</span></div>
+      <p class="definition-body">A framework for understanding how different aspects of identity — race, gender, class, sexuality, disability, etc. — overlap to shape a person's experience of power and oppression. Originally developed to describe how Black women experienced forms of discrimination that single-axis analyses (race-only OR gender-only) couldn't see.</p>
+    </div>
+    <div class="definition-entry">
+      <div class="definition-term">Intersectional Environmentalism <span>(Leah Thomas, 2020)</span></div>
+      <p class="definition-body">An inclusive version of environmentalism that advocates for the protection of both people and the planet. It names how environmental harm and social injustice are interlinked — and centres the communities most affected.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BRIDGE TO SECTION 4 -->
+<section class="begin-section reveal">
+  <div class="block-inner" style="display:flex; justify-content:space-between; align-items:center; gap:4rem; width:100%; flex-wrap:wrap;">
+    <div class="begin-text">
+      <h2 class="begin-heading">Ready to continue?</h2>
+      <p class="begin-sub">You've now held two frames side by side: the system math of overshoot, and the human history of who got included and excluded from the response. Section 4 is where they meet.</p>
+    </div>
+    <div class="begin-action">
+      <a class="btn-begin" href="section4.html">
+        Section 4 <span class="arrow"></span>
+      </a>
+      <span class="time-note">Next: Who's in the "We"?</span>
+    </div>
+  </div>
+</section>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - doc.clientHeight;
+    const scrolled = max > 0 ? Math.min(doc.scrollTop / max, 1) : 1;
+    document.getElementById('progress-bar').style.transform = `scaleX(${scrolled})`;
+  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Sidebar toggle
+  const toggle = document.querySelector('.sidebar-toggle');
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('visible');
+    toggle.classList.add('open');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+    toggle.classList.remove('open');
+  }
+
+  toggle.addEventListener('click', function () {
+    if (sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  });
+
+  overlay.addEventListener('click', closeSidebar);
+
+
+</script>
+</body>
+</html>

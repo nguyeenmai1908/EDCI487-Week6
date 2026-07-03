@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Section 4: Who's in the "We"? — EDCI 487 Week 6</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --forest:    #2d5a3f;
+      --near-black:#1c1a14;
+      --moss:      #4a6741;
+      --sage:      #7a9e6e;
+      --sage-pale: #deebd4;
+      --clay:      #c4622d;
+      --ember:     #e8874a;
+      --sand:      #e8d5b0;
+      --cream:     #f5f0e8;
+      --white:     #fefcf8;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; font-weight: 300; background: var(--cream); color: var(--near-black); min-height: 100vh; }
+    body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.035; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 200px 200px; }
+
+    #progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--clay), var(--ember)); transform-origin: left; transform: scaleX(0); transition: transform 0.1s linear; z-index: 1000; }
+
+    /* HAMBURGER TOGGLE */
+    .sidebar-toggle { position: fixed; top: 1.25rem; left: 1.25rem; z-index: 200; width: 40px; height: 40px; background: rgba(47,74,47,0.9); border: 1px solid rgba(122,158,110,0.25); border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: background 0.2s; }
+    .sidebar-toggle:hover { background: rgba(47,74,47,1); }
+    .sidebar-toggle .bar { display: block; width: 18px; height: 2px; background: var(--cream); border-radius: 1px; transition: transform 0.3s ease, opacity 0.3s ease; }
+    .sidebar-toggle.open .bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .sidebar-toggle.open .bar:nth-child(2) { opacity: 0; }
+    .sidebar-toggle.open .bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* SIDEBAR OVERLAY */
+    .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 140; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .sidebar-overlay.visible { opacity: 1; pointer-events: auto; }
+
+    /* SIDEBAR */
+    .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: #2f4a2f; border-right: 1px solid rgba(122,158,110,0.2); z-index: 150; display: flex; flex-direction: column; align-items: stretch; padding: 4.5rem 0 2rem; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s ease; text-align: left; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo { font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(122,158,110,0.5); padding: 0 1rem 1.5rem 2rem; border-bottom: 1px solid rgba(122,158,110,0.1); margin-bottom: 1.5rem; line-height: 1.6; }
+    .sidebar-nav { display: flex; flex-direction: column; padding: 0; }
+    .nav-item { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.7rem 1rem 0.7rem 2rem; position: relative; text-decoration: none; transition: background 0.2s ease; width: 100%; }
+    .nav-item:hover { background: rgba(245,240,232,0.04); }
+    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--clay); }
+    .nav-num { font-size: 0.68rem; font-weight: 500; color: rgba(245,240,232,0.25); width: 1.5rem; flex-shrink: 0; text-align: left; }
+    .nav-item.active .nav-num { color: var(--clay); }
+    .nav-label { font-size: 0.75rem; font-weight: 300; line-height: 1.4; color: rgba(245,240,232,0.35); flex: 1; min-width: 0; text-align: left; }
+    .nav-item.active .nav-label { color: var(--cream); font-weight: 500; }
+    .nav-time { font-size: 0.6rem; color: rgba(245,240,232,0.22); letter-spacing: 0.06em; flex-shrink: 0; white-space: nowrap; }
+
+    .block-inner { width: min(1080px, 100%); margin: 0 auto; }
+
+    .section-header { background: var(--forest); padding: 2.5rem 3rem; }
+    .section-header-row { display: flex; align-items: center; gap: 1.5rem; }
+    .sh-number { font-family: 'Playfair Display', serif; font-size: 10rem; font-weight: 900; color: rgba(255,255,255,0.2); line-height: 1; flex-shrink: 0; user-select: none; }
+    .sh-center { flex: 1; }
+    .sh-label { font-size: 1rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clay); margin-bottom: 0.35rem; }
+    .sh-title { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 700; color: var(--cream); line-height: 1.25; }
+    .sh-time { font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,240,232,0.28); flex-shrink: 0; align-self: center; }
+
+    .content-block { background: var(--white); padding: 3.5rem 3rem 2.5rem; }
+    .content-block.alt { background: var(--cream); }
+    .content-block p { font-size: 1rem; line-height: 1.9; color: rgba(26,46,26,0.75); margin-bottom: 0.5rem; }
+    .content-block p:last-child { margin-bottom: 0; }
+    .content-block strong { font-weight: 500; color: var(--near-black); }
+
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal[data-delay="1"] { transition-delay: 0.1s; }
+    .reveal[data-delay="2"] { transition-delay: 0.2s; }
+    .reveal[data-delay="3"] { transition-delay: 0.3s; }
+
+    /* transition card */
+    .transition-card { padding: 3rem; background: var(--forest); }
+    .transition-card p { font-size: 1rem; line-height: 1.8; color: rgba(245,240,232,0.65); font-style: italic; font-family: 'Playfair Display', serif; }
+    .transition-card-line { width: 40px; height: 2px; background: var(--clay); margin-bottom: 1.5rem; }
+
+    /* begin / continue */
+    .begin-section { background: var(--cream); padding: 4rem 3rem; display: flex; justify-content: space-between; align-items: center; gap: 4rem; }
+    .begin-text .begin-heading { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--forest); font-weight: 700; margin-bottom: 0.6rem; }
+    .begin-text .begin-sub { font-size: 1rem; line-height: 1.75; color: rgba(26,46,26,0.6); max-width: 480px; }
+    .begin-action { display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem; flex-shrink: 0; }
+    .btn-begin { display: inline-flex; align-items: center; gap: 1rem; background: var(--clay); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; padding: 1rem 2rem; border-radius: 4px; transition: background 0.2s; }
+    .btn-begin:hover { background: var(--ember); }
+    .btn-begin .arrow { width: 20px; height: 1px; background: currentColor; position: relative; transition: width 0.25s; }
+    .btn-begin:hover .arrow { width: 28px; }
+    .btn-begin .arrow::after { content: ''; position: absolute; right: 0; top: -3px; width: 7px; height: 7px; border-right: 1px solid currentColor; border-top: 1px solid currentColor; transform: rotate(45deg); }
+    .time-note { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(26,46,26,0.35); }
+
+    /* CONNECTION GRID */
+    .connection-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+    .connection-card { background: var(--white); border: 1px solid rgba(74,103,65,0.1); border-radius: 12px; padding: 1.75rem 1.75rem 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .connection-card-week { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--clay); }
+    .connection-card-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--forest); line-height: 1.3; }
+    .connection-card-body { font-size: 0.92rem; line-height: 1.8; color: rgba(26,46,26,0.7); }
+    .connection-card-role { font-size: 0.85rem; font-style: italic; color: var(--moss); margin-top: auto; padding-top: 0.5rem; }
+
+    /* DEFINITION BOX */
+    .definition-box { background: var(--sage-pale); border-radius: 12px; padding: 2.5rem 2.5rem; }
+    .definition-box-heading { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: var(--forest); margin-bottom: 1rem; }
+    .definition-box p { font-size: 1rem; line-height: 1.9; color: rgba(26,46,26,0.75); margin-bottom: 0.5rem; }
+    .definition-box p:last-child { margin-bottom: 0; }
+
+    /* REFLECTION SECTION */
+    .reflection-section { background: var(--sage-pale); padding: 3.5rem 3rem 3rem; }
+    .reflection-heading { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--forest); margin-bottom: 0.4rem; }
+    .reflection-subhead { font-size: 0.95rem; line-height: 1.7; color: rgba(26,46,26,0.6); margin-bottom: 1.5rem; }
+    .reflection-options { list-style: none; padding: 0; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .reflection-options li { font-size: 0.95rem; line-height: 1.7; color: rgba(26,46,26,0.75); padding-left: 1.25rem; position: relative; }
+    .reflection-options li::before { content: ''; position: absolute; left: 0; top: 0.65em; width: 6px; height: 6px; border-radius: 50%; background: var(--clay); }
+    .reflection-textarea { width: 100%; min-height: 8rem; padding: 1rem 1.25rem; background: var(--cream); border: 1px solid rgba(74,103,65,0.18); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 300; line-height: 1.7; color: var(--near-black); resize: vertical; }
+    .reflection-textarea:focus { outline: none; border-color: var(--sage); }
+
+    /* DECOLONIAL NOTE */
+    .decolonial-note { background: var(--sage-pale); border-left: 3px solid var(--sage); border-radius: 0 8px 8px 0; padding: 1.5rem 2rem; font-size: 0.88rem; font-style: italic; line-height: 1.85; color: rgba(26,46,26,0.7); }
+
+    @media (max-width: 768px) {
+      .section-header, .content-block, .transition-card, .begin-section, .reflection-section { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .sh-number { font-size: 5rem; }
+      .begin-section { flex-direction: column; align-items: flex-start; }
+      .begin-action { align-items: flex-start; }
+      .connection-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="progress-bar"></div>
+
+<button class="sidebar-toggle" aria-label="Toggle navigation">
+  <span class="bar"></span>
+  <span class="bar"></span>
+  <span class="bar"></span>
+</button>
+<div class="sidebar-overlay"></div>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">EDCI 487<br>Climate Change Education<br>Week 6</div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="week6-intro.html">
+      <span class="nav-num">&#8593;</span>
+      <span class="nav-label">Intro &amp; Overview</span>
+    </a>
+    <a class="nav-item" href="section1.html">
+      <span class="nav-num">01</span>
+      <span class="nav-label">One Planet's Worth of Year</span>
+    </a>
+    <a class="nav-item" href="section2.html">
+      <span class="nav-num">02</span>
+      <span class="nav-label">The Math of Demand and Regeneration</span>
+    </a>
+    <a class="nav-item" href="section3.html">
+      <span class="nav-num">03</span>
+      <span class="nav-label">The Histories That Got Left Out</span>
+    </a>
+    <a class="nav-item active" href="section4.html">
+      <span class="nav-num">04</span>
+      <span class="nav-label">Who's in the "We"?</span>
+    </a>
+    <a class="nav-item" href="section5.html">
+      <span class="nav-num">05</span>
+      <span class="nav-label">Teaching the Relational Move</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- SECTION HEADER -->
+<section class="section-header">
+  <div class="block-inner section-header-row">
+    <div class="sh-number">04</div>
+    <div class="sh-center">
+      <div class="sh-label">Section 4 of 5</div>
+      <div class="sh-title reveal">Who's in the "We"?</div>
+    </div>
+    <div class="sh-time reveal">~7 minutes</div>
+  </div>
+</section>
+
+<!-- OPENING TEXT -->
+<section class="content-block alt reveal">
+  <div class="block-inner">
+    <p>Climate education has a habit of using "we" in a way that flattens the conversation.</p>
+    <p>"We need to reduce our emissions." "We have to consume less." "We are running out of time."</p>
+    <p>The relational lens asks a sharper question: <strong>which we?</strong> The 1.8-Earth average is a global mean. The actual demand sits unevenly across nations, classes, industries, and individual households. The actual harm sits even more unevenly. And the actual knowledge for responding — including ways of relating to land that don't generate overshoot in the first place — often sits with the people the mainstream movement has historically ignored.</p>
+  </div>
+</section>
+
+<!-- CONNECTION GRID -->
+<section class="content-block alt reveal">
+  <div class="block-inner">
+    <h2 style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:var(--forest); margin-bottom:0.25rem;">What we've built so far</h2>
+    <div class="connection-grid">
+      <div class="connection-card reveal" data-delay="1">
+        <span class="connection-card-week">Week 3</span>
+        <span class="connection-card-title">Climate Justice</span>
+        <span class="connection-card-body">You learned that climate impacts fall hardest on marginalized communities. That's the harm side of the relational equation.</span>
+        <span class="connection-card-role">That's the harm side.</span>
+      </div>
+      <div class="connection-card reveal" data-delay="2">
+        <span class="connection-card-week">Week 4</span>
+        <span class="connection-card-title">Carbon Colonialism</span>
+        <span class="connection-card-body">You learned that "solutions" like carbon offsets can shift the cost of consumption from rich nations to the lands and labour of poorer ones.</span>
+        <span class="connection-card-role">That's the response side — sometimes badly done.</span>
+      </div>
+      <div class="connection-card reveal" data-delay="1">
+        <span class="connection-card-week">Week 5</span>
+        <span class="connection-card-title">Planetary Boundaries</span>
+        <span class="connection-card-body">You learned that the Earth system has hard limits, and seven of nine have been crossed. Wackernagel and Lin add a piece we didn't yet have language for: "Planetary boundaries are closely related to overshoot, but measure components of it, not the whole." Planetary boundaries name the thresholds; overshoot names the underlying dynamic.</span>
+        <span class="connection-card-role">That's the system side — the math.</span>
+      </div>
+      <div class="connection-card reveal" data-delay="2">
+        <span class="connection-card-week">Week 6</span>
+        <span class="connection-card-title">Relational Perspectives &amp; Overshoot</span>
+        <span class="connection-card-body">You're learning that the demand crossing those boundaries is unevenly distributed, that the history of environmentalism has erased the voices most needed for a just response, and that overshoot will end — by design or disaster.</span>
+        <span class="connection-card-role">That's the relational side — the who.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RELATIONAL THINKING DEFINED -->
+<section class="content-block alt reveal">
+  <div class="block-inner">
+    <div class="definition-box">
+      <h3 class="definition-box-heading">Relational thinking, defined</h3>
+      <p>Relational thinking treats humans and non-human systems as continuously shaping each other. It refuses the separation between "the environment" (out there, in nature) and "society" (in here, in cities and laws).</p>
+      <p>This is not just a philosophical stance. It's increasingly how Earth system science itself works — and it's how many Indigenous knowledge systems have always worked. Recognizing relation is the first move toward responding without reproducing harm.</p>
+      <p style="margin-top:1.25rem;">That last point deserves a pause — because it shapes everything that follows.</p>
+    </div>
+  </div>
+</section>
+
+<!-- REFLECTION PROMPT -->
+<section class="reflection-section reveal">
+  <div class="block-inner">
+    <h2 class="reflection-heading">One thing to bring to class</h2>
+    <p class="reflection-subhead">With all of that in mind — the system math, the human history, the relational frame, and the question of whose knowledge counts — pick the one that catches you. Sit with it and bring your thinking to class.</p>
+    <ul class="reflection-options">
+      <li>"Whose voices have shaped your image of 'the environment' so far in your life?"</li>
+      <li>"Which Week 3-6 idea would change most about how you'd teach climate to a Grade 5 class — and how?"</li>
+      <li>"Wackernagel says overshoot will end 'by design or by disaster.' What does 'by design' look like, in your subject area or future classroom?"</li>
+    </ul>
+  </div>
+</section>
+
+<!-- BRIDGE TO SECTION 5 -->
+<section class="begin-section reveal">
+  <div class="block-inner" style="display:flex; justify-content:space-between; align-items:center; gap:4rem; width:100%; flex-wrap:wrap;">
+    <div class="begin-text">
+      <h2 class="begin-heading">Ready to continue?</h2>
+      <p class="begin-sub">One section to go. We'll bring this into the classroom — what teaching relational thinking actually looks like in practice.</p>
+    </div>
+    <div class="begin-action">
+      <a class="btn-begin" href="section5.html">
+        Section 5 <span class="arrow"></span>
+      </a>
+      <span class="time-note">Next: Teaching the Relational Move</span>
+    </div>
+  </div>
+</section>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - doc.clientHeight;
+    const scrolled = max > 0 ? Math.min(doc.scrollTop / max, 1) : 1;
+    document.getElementById('progress-bar').style.transform = `scaleX(${scrolled})`;
+  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Sidebar toggle
+  const toggle = document.querySelector('.sidebar-toggle');
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('visible');
+    toggle.classList.add('open');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+    toggle.classList.remove('open');
+  }
+
+  toggle.addEventListener('click', function () {
+    if (sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  });
+
+  overlay.addEventListener('click', closeSidebar);
+</script>
+</body>
+</html>

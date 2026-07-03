@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Section 2: The Math of Demand and Regeneration — EDCI 487 Week 6</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --forest:    #2d5a3f;
+      --near-black:#1c1a14;
+      --moss:      #4a6741;
+      --sage:      #7a9e6e;
+      --sage-pale: #deebd4;
+      --clay:      #c4622d;
+      --ember:     #e8874a;
+      --sand:      #e8d5b0;
+      --cream:     #f5f0e8;
+      --white:     #fefcf8;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; font-weight: 300; background: var(--cream); color: var(--near-black); min-height: 100vh; }
+    body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.035; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 200px 200px; }
+
+    #progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--clay), var(--ember)); transform-origin: left; transform: scaleX(0); transition: transform 0.1s linear; z-index: 1000; }
+
+    /* HAMBURGER TOGGLE */
+    .sidebar-toggle { position: fixed; top: 1.25rem; left: 1.25rem; z-index: 200; width: 40px; height: 40px; background: rgba(47,74,47,0.9); border: 1px solid rgba(122,158,110,0.25); border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: background 0.2s; }
+    .sidebar-toggle:hover { background: rgba(47,74,47,1); }
+    .sidebar-toggle .bar { display: block; width: 18px; height: 2px; background: var(--cream); border-radius: 1px; transition: transform 0.3s ease, opacity 0.3s ease; }
+    .sidebar-toggle.open .bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .sidebar-toggle.open .bar:nth-child(2) { opacity: 0; }
+    .sidebar-toggle.open .bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* SIDEBAR OVERLAY */
+    .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 140; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .sidebar-overlay.visible { opacity: 1; pointer-events: auto; }
+
+    /* SIDEBAR */
+    .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: #2f4a2f; border-right: 1px solid rgba(122,158,110,0.2); z-index: 150; display: flex; flex-direction: column; align-items: stretch; padding: 4.5rem 0 2rem; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s ease; text-align: left; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo { font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(122,158,110,0.5); padding: 0 1rem 1.5rem 2rem; border-bottom: 1px solid rgba(122,158,110,0.1); margin-bottom: 1.5rem; line-height: 1.6; }
+    .sidebar-nav { display: flex; flex-direction: column; padding: 0; }
+    .nav-item { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.7rem 1rem 0.7rem 2rem; position: relative; text-decoration: none; transition: background 0.2s ease; width: 100%; }
+    .nav-item:hover { background: rgba(245,240,232,0.04); }
+    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--clay); }
+    .nav-num { font-size: 0.68rem; font-weight: 500; color: rgba(245,240,232,0.25); width: 1.5rem; flex-shrink: 0; text-align: left; }
+    .nav-item.active .nav-num { color: var(--clay); }
+    .nav-label { font-size: 0.75rem; font-weight: 300; line-height: 1.4; color: rgba(245,240,232,0.35); flex: 1; min-width: 0; text-align: left; }
+    .nav-item.active .nav-label { color: var(--cream); font-weight: 500; }
+    .nav-time { font-size: 0.6rem; color: rgba(245,240,232,0.22); letter-spacing: 0.06em; flex-shrink: 0; white-space: nowrap; }
+
+    .block-inner { width: min(1080px, 100%); margin: 0 auto; }
+
+    .section-header { background: var(--forest); padding: 2.5rem 3rem; }
+    .section-header-row { display: flex; align-items: center; gap: 1.5rem; }
+    .sh-number { font-family: 'Playfair Display', serif; font-size: 10rem; font-weight: 900; color: rgba(255,255,255,0.2); line-height: 1; flex-shrink: 0; user-select: none; }
+    .sh-center { flex: 1; }
+    .sh-label { font-size: 1rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clay); margin-bottom: 0.35rem; }
+    .sh-title { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 700; color: var(--cream); line-height: 1.25; }
+    .sh-time { font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,240,232,0.28); flex-shrink: 0; align-self: center; }
+
+    .content-block { background: var(--white); padding: 3.5rem 3rem 2.5rem; }
+    .content-block.alt { background: var(--cream); }
+    .content-block p { font-size: 1rem; line-height: 1.9; color: rgba(26,46,26,0.75); margin-bottom: 0.5rem; }
+    .content-block p:last-child { margin-bottom: 0; }
+    .content-block strong { font-weight: 500; color: var(--near-black); }
+
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal[data-delay="1"] { transition-delay: 0.1s; }
+    .reveal[data-delay="2"] { transition-delay: 0.2s; }
+    .reveal[data-delay="3"] { transition-delay: 0.3s; }
+
+    /* transition card */
+    .transition-card { padding: 3rem; background: var(--forest); }
+    .transition-card p { font-size: 1rem; line-height: 1.8; color: rgba(245,240,232,0.65); font-style: italic; font-family: 'Playfair Display', serif; }
+    .transition-card-line { width: 40px; height: 2px; background: var(--clay); margin-bottom: 1.5rem; }
+
+    /* begin / continue */
+    .begin-section { background: var(--cream); padding: 4rem 3rem; display: flex; justify-content: space-between; align-items: center; gap: 4rem; }
+    .begin-text .begin-heading { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--forest); font-weight: 700; margin-bottom: 0.6rem; }
+    .begin-text .begin-sub { font-size: 1rem; line-height: 1.75; color: rgba(26,46,26,0.6); max-width: 480px; }
+    .begin-action { display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem; flex-shrink: 0; }
+    .btn-begin { display: inline-flex; align-items: center; gap: 1rem; background: var(--clay); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; padding: 1rem 2rem; border-radius: 4px; transition: background 0.2s; }
+    .btn-begin:hover { background: var(--ember); }
+    .btn-begin .arrow { width: 20px; height: 1px; background: currentColor; position: relative; transition: width 0.25s; }
+    .btn-begin:hover .arrow { width: 28px; }
+    .btn-begin .arrow::after { content: ''; position: absolute; right: 0; top: -3px; width: 7px; height: 7px; border-right: 1px solid currentColor; border-top: 1px solid currentColor; transform: rotate(45deg); }
+    .time-note { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(26,46,26,0.35); }
+
+    /* ========================================
+       SECTION 2 CUSTOM COMPONENTS
+       ======================================== */
+
+    /* DEFINITION CARD */
+    .definition-card { background: var(--sage-pale); border-left: 4px solid var(--clay); padding: 2.5rem 3rem; }
+    .definition-card .block-inner { display: flex; flex-direction: column; gap: 1rem; }
+    .definition-card-heading { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--forest); }
+    .definition-card-body { font-size: 1.05rem; line-height: 1.9; color: rgba(26,46,26,0.78); font-style: italic; }
+    .definition-card-attribution { font-size: 0.78rem; color: rgba(26,46,26,0.45); line-height: 1.6; margin-top: 0.5rem; }
+
+    /* CONCEPT GRID */
+    .concept-grid-section { background: var(--cream); padding: 3.5rem 3rem 2.5rem; }
+    .concept-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 0.5rem; }
+    .concept-grid-card { background: var(--white); border: 1px solid rgba(74,103,65,0.12); border-radius: 12px; padding: 2rem 1.75rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .concept-grid-card .card-num { font-size: 0.65rem; font-weight: 600; color: var(--clay); background: rgba(196,98,45,0.1); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; letter-spacing: 0; }
+    .concept-grid-card .card-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; color: var(--forest); }
+    .concept-grid-card .card-body { font-size: 0.95rem; line-height: 1.8; color: rgba(26,46,26,0.7); }
+
+    /* SAGE CALLOUT */
+    .sage-callout { background: var(--sage-pale); border-left: 4px solid var(--moss); padding: 2.5rem 3rem; }
+    .sage-callout .callout-intro { font-size: 1rem; line-height: 1.9; color: rgba(26,46,26,0.75); margin-bottom: 1.5rem; }
+    .sage-callout .callout-quote { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.05rem; line-height: 1.85; color: rgba(26,46,26,0.7); padding-left: 1.5rem; border-left: 2px solid rgba(74,103,65,0.2); margin-bottom: 0.75rem; }
+    .sage-callout .callout-source { font-size: 0.78rem; color: rgba(26,46,26,0.45); padding-left: 1.5rem; margin-bottom: 1.5rem; }
+    .sage-callout .callout-note { font-size: 1rem; line-height: 1.9; color: rgba(26,46,26,0.75); }
+
+    /* TIMELINE */
+    .timeline-section { background: var(--cream); padding: 3.5rem 3rem 2.5rem; }
+    .timeline-heading { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 700; color: var(--forest); margin-bottom: 2rem; }
+    .timeline { display: flex; flex-direction: column; gap: 0; position: relative; }
+    .timeline::before { content: ''; position: absolute; left: 60px; top: 0; bottom: 0; width: 2px; background: rgba(74,103,65,0.15); }
+    .timeline-entry { display: flex; align-items: flex-start; gap: 1.5rem; padding: 1.5rem 0; position: relative; }
+    .timeline-entry + .timeline-entry { border-top: 1px solid rgba(74,103,65,0.08); }
+    .timeline-year { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--forest); width: 60px; flex-shrink: 0; text-align: right; position: relative; }
+    .timeline-dot { width: 12px; height: 12px; background: var(--clay); border: 3px solid var(--cream); border-radius: 50%; flex-shrink: 0; margin-top: 0.35rem; position: relative; z-index: 1; }
+    .timeline-content { flex: 1; }
+    .timeline-date { font-size: 0.85rem; font-weight: 500; color: var(--clay); margin-bottom: 0.3rem; }
+    .timeline-desc { font-size: 0.95rem; line-height: 1.8; color: rgba(26,46,26,0.7); }
+    .timeline-source { font-size: 0.75rem; color: rgba(26,46,26,0.4); margin-top: 1.25rem; line-height: 1.6; }
+
+    /* COUNTRY LIST */
+    .country-block { background: var(--white); border-left: 4px solid var(--clay); padding: 2.5rem 3rem; }
+    .country-block .country-heading { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--forest); margin-bottom: 0.75rem; }
+    .country-block .country-intro { font-size: 0.95rem; line-height: 1.8; color: rgba(26,46,26,0.65); margin-bottom: 1.25rem; font-style: italic; }
+    .country-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+    .country-list li { display: flex; align-items: baseline; gap: 1rem; padding: 0.65rem 0; border-bottom: 1px solid rgba(74,103,65,0.06); font-size: 0.95rem; color: rgba(26,46,26,0.7); }
+    .country-list li:last-child { border-bottom: none; }
+    .country-list .country-name { font-weight: 500; color: var(--near-black); min-width: 120px; }
+    .country-list .country-date { color: var(--clay); font-weight: 500; }
+    .country-block .country-note { font-size: 0.95rem; line-height: 1.8; color: rgba(26,46,26,0.65); margin-top: 1.25rem; font-style: italic; }
+
+    /* PIVOT BLOCK */
+    .pivot-block { background: var(--clay); padding: 3rem; }
+    .pivot-block p { font-size: 1.15rem; line-height: 1.85; color: var(--white); }
+    .pivot-block p + p { margin-top: 1rem; }
+    .pivot-block strong { font-weight: 500; color: var(--white); }
+
+    /* READING PROMPT */
+    .reading-prompt { background: var(--white); padding: 3.5rem 3rem 2.5rem; }
+    .reading-prompt .prompt-heading { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--forest); margin-bottom: 1rem; }
+    .reading-prompt .prompt-body { font-size: 1rem; line-height: 1.9; color: rgba(26,46,26,0.75); margin-bottom: 1.5rem; }
+
+    @media (max-width: 768px) {
+      .section-header, .content-block, .transition-card, .begin-section,
+      .definition-card, .concept-grid-section, .sage-callout, .timeline-section,
+      .country-block, .pivot-block, .reading-prompt { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .sh-number { font-size: 5rem; }
+      .begin-section { flex-direction: column; align-items: flex-start; }
+      .begin-action { align-items: flex-start; }
+      .concept-grid { grid-template-columns: 1fr; }
+      .timeline::before { left: 40px; }
+      .timeline-year { width: 40px; font-size: 1.15rem; }
+      .country-list li { flex-direction: column; gap: 0.2rem; }
+      .country-list .country-name { min-width: auto; }
+    }
+  </style>
+</head>
+<body>
+<div id="progress-bar"></div>
+
+<button class="sidebar-toggle" aria-label="Toggle navigation">
+  <span class="bar"></span>
+  <span class="bar"></span>
+  <span class="bar"></span>
+</button>
+<div class="sidebar-overlay"></div>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">EDCI 487<br>Climate Change Education<br>Week 6</div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="week6-intro.html">
+      <span class="nav-num">&uarr;</span>
+      <span class="nav-label">Intro &amp; Overview</span>
+    </a>
+    <a class="nav-item" href="section1.html">
+      <span class="nav-num">01</span>
+      <span class="nav-label">One Planet's Worth of Year</span>
+    </a>
+    <a class="nav-item active" href="section2.html">
+      <span class="nav-num">02</span>
+      <span class="nav-label">The Math of Demand and Regeneration</span>
+    </a>
+    <a class="nav-item" href="section3.html">
+      <span class="nav-num">03</span>
+      <span class="nav-label">The Histories That Got Left Out</span>
+    </a>
+    <a class="nav-item" href="section4.html">
+      <span class="nav-num">04</span>
+      <span class="nav-label">Who's in the "We"?</span>
+    </a>
+    <a class="nav-item" href="section5.html">
+      <span class="nav-num">05</span>
+      <span class="nav-label">Teaching the Relational Move</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- SECTION HEADER -->
+<section class="section-header">
+  <div class="block-inner section-header-row">
+    <div class="sh-number">02</div>
+    <div class="sh-center">
+      <div class="sh-label">Section 2 of 5</div>
+      <div class="sh-title reveal">The Math of Demand and Regeneration</div>
+    </div>
+    <div class="sh-time reveal">~10 minutes</div>
+  </div>
+</section>
+
+<!-- OPENING -->
+<section class="content-block reveal">
+  <div class="block-inner">
+    <p>
+      Picture a forest. Each year, the trees grow some amount of new wood, the soil regenerates some amount of nutrients, the streams move some amount of water through. That is the forest's annual regeneration — what it can give back without losing itself.
+    </p>
+    <p>
+      Now picture cutting a little more wood than the forest grows each year. For one year, you would barely notice. For ten, the forest thins. For a hundred, it is gone — not because anyone "killed" it in a single act, but because demand exceeded regeneration, year after year, until the accumulated stock was used up.
+    </p>
+    <p>
+      <strong>That gap — between demand and regeneration — is overshoot.</strong>
+    </p>
+  </div>
+</section>
+
+<!-- DEFINITION CARD -->
+<section class="definition-card reveal">
+  <div class="block-inner">
+    <div class="definition-card-heading">Overshoot</div>
+    <div class="definition-card-body">
+      "Overshoot is the state in which human demand, within a given time period, exceeds the amount ecosystems regenerate in the same time period. Overshoot is possible because the accumulated stock of ecosystems can be depleted. The accumulation of greenhouse gases in the atmosphere is one of the most prominent symptoms of overshoot. But global depletion is not a long-term option. Therefore, global overshoot will inevitably end."
+    </div>
+    <div class="definition-card-attribution">
+      Wackernagel, M., &amp; Lin, D. (2023). Overshoot. In <em>Handbook of the Anthropocene</em>. Springer.
+    </div>
+  </div>
+</section>
+
+<!-- CONCEPT GRID: THREE-PART BREAKDOWN -->
+<section class="concept-grid-section reveal">
+  <div class="block-inner">
+    <p style="font-size:0.95rem; line-height:1.8; color:rgba(26,46,26,0.65); margin-bottom:1.25rem;">That definition rests on three moving parts. Here's how they fit together:</p>
+    <div class="concept-grid">
+      <div class="concept-grid-card">
+        <span class="card-num">01</span>
+        <div class="card-title">Demand</div>
+        <div class="card-body">A measurable quantity: the resources and waste-absorption capacity humanity uses each year. Calculated as the Ecological Footprint (in global hectares).</div>
+      </div>
+      <div class="concept-grid-card">
+        <span class="card-num">02</span>
+        <div class="card-title">Regeneration</div>
+        <div class="card-body">A measurable quantity: how much Earth's ecosystems renew each year — forests regrowing, fisheries replenishing, the atmosphere and oceans absorbing CO2. Calculated as biocapacity (in global hectares).</div>
+      </div>
+      <div class="concept-grid-card">
+        <span class="card-num">03</span>
+        <div class="card-title">The Compounding</div>
+        <div class="card-body">When demand exceeds regeneration, the gap doesn't just persist — it compounds. Each year's deficit draws down stock that took decades to build. And because the signals of damage (warming, species loss, soil depletion) arrive years or decades later, the overshoot grows long before anyone feels it.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEFICIT-AND-DEBT FRAME (SAGE CALLOUT) -->
+<section class="sage-callout reveal">
+  <div class="block-inner">
+    <div class="callout-intro">
+      The household-budget hook in Section 1 was not just a teaching device. Wackernagel and Lin use exactly this frame in the chapter:
+    </div>
+    <div class="callout-quote">
+      "The relationship between deficit spending (annual emissions) and the accumulated debt (greenhouse gas concentration in the atmosphere), [runs] somewhat parallel to financial deficit and debt. As with finances, low levels of ecological debt are tolerable, but as ecological deficit spending continues, the debt becomes so large that its impact becomes difficult to manage."
+    </div>
+    <div class="callout-source">
+      — Wackernagel &amp; Lin (2023), p. 627
+    </div>
+    <div class="callout-note">
+      The concrete example: adding 5 ppm of CO2 when the concentration is 300 ppm barely registers. Adding 5 ppm at today's concentration radically increases the likelihood of runaway climate change.
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="timeline-section reveal">
+  <div class="block-inner">
+    <div class="timeline-heading">Earth Overshoot Day, 1971 to 2025</div>
+    <div class="timeline">
+      <div class="timeline-entry">
+        <div class="timeline-year">1971</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="timeline-date">December 25</div>
+          <div class="timeline-desc">Humanity used roughly one Earth's worth of nature per year. Overshoot was just beginning.</div>
+        </div>
+      </div>
+      <div class="timeline-entry">
+        <div class="timeline-year">1990</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="timeline-date">October 11</div>
+          <div class="timeline-desc">Demand had outpaced regeneration by about 3 months annually.</div>
+        </div>
+      </div>
+      <div class="timeline-entry">
+        <div class="timeline-year">2010</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="timeline-date">August 7</div>
+          <div class="timeline-desc">The 1.5-Earth threshold.</div>
+        </div>
+      </div>
+      <div class="timeline-entry">
+        <div class="timeline-year">2025</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="timeline-date">July 24</div>
+          <div class="timeline-desc">1.8 Earths required to meet annual demand. The earliest Overshoot Day ever recorded.</div>
+        </div>
+      </div>
+    </div>
+    <div class="timeline-source">Source: Global Footprint Network National Footprint and Biocapacity Accounts, 2025 edition.</div>
+  </div>
+</section>
+
+<!-- COUNTRY COMPARISON -->
+<section class="country-block reveal">
+  <div class="block-inner">
+    <div class="country-heading">Country Overshoot Days, 2025</div>
+    <div class="country-intro">If everyone on Earth lived like the average person in:</div>
+    <ul class="country-list">
+      <li><span class="country-name">Singapore</span> <span class="country-date">January 3</span></li>
+      <li><span class="country-name">Qatar</span> <span class="country-date">January 24</span></li>
+      <li><span class="country-name">United States</span> <span class="country-date">March 14</span></li>
+      <li><span class="country-name">Canada</span> <span class="country-date">March 14 (tied)</span></li>
+      <li><span class="country-name">China</span> <span class="country-date">June 4</span></li>
+      <li><span class="country-name">Brazil</span> <span class="country-date">August 12</span></li>
+      <li><span class="country-name">India</span> <span class="country-date">December 8</span></li>
+    </ul>
+    <div class="country-note">The average Canadian uses about five times more nature than the global biocapacity per person.</div>
+  </div>
+</section>
+
+<!-- THE RELATIONAL PIVOT -->
+<section class="pivot-block reveal">
+  <div class="block-inner">
+    <p>
+      Notice what the country comparison reveals: overshoot is not a "humanity" problem in the simple sense. There is a humanity that lives within Earth's budget, and a humanity that does not. Wealth, geography, and consumption patterns matter.
+    </p>
+    <p>
+      This is where the system math meets the relational question. <strong>Demand is not anonymous. It has a return address.</strong>
+    </p>
+  </div>
+</section>
+
+<!-- READING PROMPT -->
+<section class="reading-prompt reveal">
+  <div class="block-inner">
+    <div class="prompt-heading">Read the chapter</div>
+    <div class="prompt-body">
+      The Wackernagel &amp; Lin chapter is short — about 5 pages — and gives you the original framing in the authors' own words. Read it after this section. As you read, hold one question: <strong style="background:rgba(232,135,74,0.25); padding:0.1em 0.3em; border-radius:3px;">what does it mean that overshoot will inevitably end, but only the manner of ending is up to us?</strong>
+    </div>
+    <a class="btn-begin" href="978-3-031-25910-4_101.pdf" target="_blank" rel="noopener" style="margin-top:1rem;">
+      Read the chapter (PDF) <span class="arrow"></span>
+    </a>
+  </div>
+</section>
+
+<!-- BRIDGE TO SECTION 3 -->
+<section class="begin-section reveal">
+  <div class="block-inner" style="display:flex; justify-content:space-between; align-items:center; gap:4rem; width:100%; flex-wrap:wrap;">
+    <div class="begin-text">
+      <h2 class="begin-heading">Ready to continue?</h2>
+      <p class="begin-sub">
+        Now we turn from the math to the people. Section 3 is the heart of this week — a video on the intersectional history of the environmental movement, and a structured reflection to help you process it.
+      </p>
+    </div>
+    <div class="begin-action">
+      <a class="btn-begin" href="section3.html">
+        Section 3 <span class="arrow"></span>
+      </a>
+      <span class="time-note">Next: The Histories That Got Left Out</span>
+    </div>
+  </div>
+</section>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - doc.clientHeight;
+    const scrolled = max > 0 ? Math.min(doc.scrollTop / max, 1) : 1;
+    document.getElementById('progress-bar').style.transform = `scaleX(${scrolled})`;
+  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Sidebar toggle
+  const toggle = document.querySelector('.sidebar-toggle');
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('visible');
+    toggle.classList.add('open');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+    toggle.classList.remove('open');
+  }
+
+  toggle.addEventListener('click', function () {
+    if (sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  });
+
+  overlay.addEventListener('click', closeSidebar);
+</script>
+</body>
+</html>
